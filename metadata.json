@@ -1,0 +1,6 @@
+{
+  "name": "Editorial Wedding Invitation",
+  "description": "A luxury, editorial, bespoke digital wedding invitation experience.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
