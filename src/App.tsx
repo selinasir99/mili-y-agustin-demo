@@ -31,9 +31,9 @@ export default function App() {
       bride: 'Mili',
       groom: 'Agus',
     },
-    date: '2026-09-26T15:45:00',
+    date: '2026-09-26T16:00:00',
     formattedDate: '26 de septiembre de 2026',
-    time: '15:45 hs',
+    time: '16:00 hs',
     venue: {
       name: 'Villa Nougués',
       location: 'Tucumán',
@@ -103,31 +103,31 @@ export default function App() {
             {/* Section 2: Countdown */}
             <Countdown targetDate={wedding.date} />
 
-            {/* Section 3: Timeline (Ceremonia y Fiesta) */}
-            <Timeline />
-
             {/* Editorial Transition Block 1: Olive Section Transition with Single Fine Line */}
             <SectionTransitionBlock variant="olive-line" />
 
-            {/* Section 4: Confirmación de asistencia (RSVP) */}
+            {/* Section 3: Confirmación de asistencia (RSVP) */}
             <RsvpForm />
 
-            {/* Section 5: Dress Code */}
-            <DressCode />
-
-            {/* Section 6: Playlist */}
-            <Playlist />
+            {/* Section 4: Dónde (Ceremonia y Fiesta) */}
+            <Timeline />
 
             {/* Editorial Transition Block 2: Olive Monogram M & A */}
             <SectionTransitionBlock variant="olive-monogram" />
 
-            {/* Section 7: Gifts (Regalos) */}
+            {/* Section 5: Regalos (Datos bancarios y Lista de regalos) */}
             <Gifts />
 
-            {/* Section 8: Photos (Fotos) */}
+            {/* Section 6: Código de vestimenta (Formal Elegante) */}
+            <DressCode />
+
+            {/* Section 7: Playlist */}
+            <Playlist />
+
+            {/* Section 8: Fotos */}
             <Photos />
 
-            {/* Section 9: Accommodations (Hospedaje) */}
+            {/* Section 9: Hospedaje (Accommodations) */}
             <Accommodations onOpenAccommodations={handleOpenAccommodations} />
 
             {/* Section 10: Nuestros Recuerdos (Memories Carousel) */}

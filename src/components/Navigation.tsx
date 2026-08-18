@@ -40,11 +40,11 @@ export const Navigation: React.FC<NavigationProps> = ({
   const navLinks = [
     { name: 'Inicio', href: '#hero' },
     { name: 'Cuenta Regresiva', href: '#cuenta-regresiva' },
-    { name: 'Programa', href: '#programa' },
     { name: 'Confirmar', href: '#rsvp' },
+    { name: 'Dónde', href: '#programa' },
+    { name: 'Regalos', href: '#regalos' },
     { name: 'Dress Code', href: '#dress-code' },
     { name: 'Playlist', href: '#playlist' },
-    { name: 'Regalos', href: '#regalos' },
     { name: 'Fotos', href: '#fotos' },
     { name: 'Hospedaje', href: '#hospedaje' },
     { name: 'Recuerdos', href: '#recuerdos' },
