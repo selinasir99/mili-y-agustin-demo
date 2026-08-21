@@ -1,11 +1,13 @@
 import React from 'react';
 import { motion } from 'motion/react';
+import { Settings } from 'lucide-react';
 
 interface WelcomeScreenProps {
   onOpen: () => void;
+  onOpenAdmin?: () => void;
 }
 
-export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onOpen }) => {
+export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onOpen, onOpenAdmin }) => {
   return (
     <motion.div
       initial={{ opacity: 0 }}
@@ -14,6 +16,20 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onOpen }) => {
       transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
       className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-[#FAF7F2] bg-grain px-6 py-12 text-center select-none overflow-hidden"
     >
+      {/* Top right admin access */}
+      {onOpenAdmin && (
+        <div className="absolute top-6 right-6 z-20">
+          <button
+            onClick={onOpenAdmin}
+            className="p-2.5 rounded-full bg-[#FAF7F2] border border-[#E8E2D8] text-[#9C9286] hover:text-[#2A221E] hover:border-[#656D4A]/50 transition-all shadow-xs cursor-pointer"
+            title="Panel de administración"
+            aria-label="Configuración"
+          >
+            <Settings className="w-4 h-4 stroke-[1.5]" />
+          </button>
+        </div>
+      )}
+
       {/* Centered Editorial Welcome Layout */}
       <div className="w-full max-w-xl mx-auto flex flex-col items-center justify-center my-auto relative z-10 space-y-10 sm:space-y-12">
         

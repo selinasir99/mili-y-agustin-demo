@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Menu, X, Volume2, VolumeX, Music } from 'lucide-react';
+import { Menu, X, Volume2, VolumeX, Music, Settings } from 'lucide-react';
 import { audioEngine } from '../utils/audio';
 
 interface NavigationProps {
@@ -8,6 +8,7 @@ interface NavigationProps {
   setIsMuted: (muted: boolean) => void;
   isPlaying: boolean;
   setIsPlaying: (playing: boolean) => void;
+  onOpenAdmin: () => void;
 }
 
 export const Navigation: React.FC<NavigationProps> = ({
@@ -15,6 +16,7 @@ export const Navigation: React.FC<NavigationProps> = ({
   setIsMuted,
   isPlaying,
   setIsPlaying,
+  onOpenAdmin,
 }) => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -93,8 +95,9 @@ export const Navigation: React.FC<NavigationProps> = ({
             ))}
           </nav>
 
-          {/* Controls: Audio Toggle & Mobile Menu Trigger */}
-          <div className="flex items-center gap-3">
+          {/* Controls: Audio Toggle, Settings & Mobile Menu Trigger */}
+          <div className="flex items-center gap-2.5 sm:gap-3">
+            {/* Music Toggle Button */}
             <button
               onClick={handleToggleMute}
               className="group flex items-center gap-2.5 px-3.5 py-2 rounded-full bg-[#FAF7F2] border border-[#E8E2D8] text-[#2A221E] hover:border-[#656D4A]/50 transition-all shadow-sm cursor-pointer"
@@ -122,10 +125,20 @@ export const Navigation: React.FC<NavigationProps> = ({
               )}
             </button>
 
+            {/* Admin Settings Button */}
+            <button
+              onClick={onOpenAdmin}
+              className="p-2 rounded-full bg-[#FAF7F2] border border-[#E8E2D8] text-[#6E645A] hover:text-[#2A221E] hover:border-[#656D4A]/50 transition-all shadow-sm cursor-pointer"
+              title="Panel de administración y respuestas"
+              aria-label="Configuración"
+            >
+              <Settings className="w-4 h-4 stroke-[1.5]" />
+            </button>
+
             {/* Mobile Menu Button */}
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="lg:hidden p-2 rounded-full bg-[#FAF7F2] border border-[#E8E2D8] text-[#2A221E] focus:outline-none"
+              className="lg:hidden p-2 rounded-full bg-[#FAF7F2] border border-[#E8E2D8] text-[#2A221E] focus:outline-none cursor-pointer"
               aria-label="Abrir menú"
             >
               {mobileMenuOpen ? <X className="w-4 h-4" /> : <Menu className="w-4 h-4" />}
@@ -144,7 +157,7 @@ export const Navigation: React.FC<NavigationProps> = ({
             transition={{ duration: 0.3 }}
             className="fixed inset-0 z-30 bg-[#FAF7F2] bg-grain pt-28 px-8 pb-12 flex flex-col justify-between lg:hidden"
           >
-            <div className="space-y-6 text-center my-auto">
+            <div className="space-y-5 text-center my-auto">
               {navLinks.map((link) => (
                 <div key={link.name} className="py-1">
                   <a
@@ -156,6 +169,20 @@ export const Navigation: React.FC<NavigationProps> = ({
                   </a>
                 </div>
               ))}
+
+              {/* Mobile Admin Link */}
+              <div className="pt-2">
+                <button
+                  onClick={() => {
+                    setMobileMenuOpen(false);
+                    onOpenAdmin();
+                  }}
+                  className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-[#FFFFFF] border border-[#E8E2D8] text-xs font-sans uppercase tracking-[0.2em] text-[#6E645A] font-medium"
+                >
+                  <Settings className="w-3.5 h-3.5" />
+                  <span>Panel de Respuestas</span>
+                </button>
+              </div>
             </div>
 
             <div className="text-center pt-8 border-t border-[#E8E2D8]">

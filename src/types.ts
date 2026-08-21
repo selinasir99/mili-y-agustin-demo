@@ -58,3 +58,14 @@ export interface RsvpData {
   dietaryOther?: string;
   message?: string;
 }
+
+export interface RsvpSubmission {
+  id: string;
+  fullName: string;
+  attending: 'yes' | 'no';
+  peopleCount: number;
+  dietary: string;
+  comments: string;
+  createdAt: string;
+}
+

@@ -1,19 +1,28 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Check, Loader2, MailCheck } from 'lucide-react';
+import { Check, Loader2 } from 'lucide-react';
 
 export const RsvpForm: React.FC = () => {
   const [fullName, setFullName] = useState('');
   const [attending, setAttending] = useState<'yes' | 'no' | ''>('');
   const [peopleCount, setPeopleCount] = useState<number>(1);
+  const [dietary, setDietary] = useState<string>('Ninguno');
   const [comments, setComments] = useState('');
 
   const [loading, setLoading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
+  // Ref lock to completely prevent double-click / double-submission
+  const isSubmittingRef = useRef(false);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    // Prevent concurrent / duplicate submit execution
+    if (isSubmittingRef.current || loading) {
+      return;
+    }
 
     if (!fullName.trim()) {
       setErrorMessage('Por favor, ingresá tu nombre y apellido.');
@@ -25,6 +34,7 @@ export const RsvpForm: React.FC = () => {
       return;
     }
 
+    isSubmittingRef.current = true;
     setLoading(true);
     setErrorMessage(null);
 
@@ -34,13 +44,56 @@ export const RsvpForm: React.FC = () => {
       timeZone: 'America/Argentina/Buenos_Aires',
     });
 
+    const uniqueId = Date.now().toString() + '-' + Math.random().toString(36).substring(2, 9);
+    const count = attending === 'yes' ? Number(peopleCount || 1) : 0;
+
+    const newRecord = {
+      id: uniqueId,
+      fullName: fullName.trim(),
+      attending: (attending === 'yes' ? 'yes' : 'no') as 'yes' | 'no',
+      peopleCount: count,
+      dietary: dietary,
+      comments: comments.trim() || 'Sin comentarios',
+      createdAt: new Date().toISOString(),
+    };
+
+    // 1. Save to LocalStorage as immediate client backup
+    try {
+      const stored = localStorage.getItem('wedding_rsvps_records');
+      const list = stored ? JSON.parse(stored) : [];
+      list.unshift(newRecord);
+      localStorage.setItem('wedding_rsvps_records', JSON.stringify(list));
+    } catch (e) {
+      console.warn('LocalStorage backup error', e);
+    }
+
+    // 2. Save single record to Server Database via /api/rsvps
+    try {
+      await fetch('/api/rsvps', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          id: uniqueId,
+          fullName: fullName.trim(),
+          attending: attending,
+          peopleCount: count,
+          dietary: dietary,
+          comments: comments.trim(),
+        }),
+      });
+    } catch (err) {
+      console.warn('Server API save note:', err);
+    }
+
+    // 3. Send email notification copy (best-effort, non-blocking)
     const payload = {
       _subject: `Confirmación de Boda: ${fullName.trim()}`,
       _template: 'table',
       _captcha: 'false',
       'Nombre y apellido': fullName.trim(),
       '¿Confirma asistencia?': attending === 'yes' ? 'Sí, asistirá' : 'No asistirá',
-      'Cantidad de personas': attending === 'yes' ? peopleCount : 0,
+      'Cantidad de personas': count,
+      'Requerimientos alimentarios': dietary,
       'Comentarios': comments.trim() || 'Sin comentarios',
       'Fecha y hora de envío': submissionDate,
     };
@@ -54,23 +107,18 @@ export const RsvpForm: React.FC = () => {
         },
         body: JSON.stringify(payload),
       });
-
-      setSubmitted(true);
-      // Automatically clear form fields
-      setFullName('');
-      setAttending('');
-      setPeopleCount(1);
-      setComments('');
     } catch (err) {
-      // In case of network edge cases, still mark as submitted gracefully
-      setSubmitted(true);
-      setFullName('');
-      setAttending('');
-      setPeopleCount(1);
-      setComments('');
-    } finally {
-      setLoading(false);
+      // Ignore external email service issues
     }
+
+    setSubmitted(true);
+    setFullName('');
+    setAttending('');
+    setPeopleCount(1);
+    setDietary('Ninguno');
+    setComments('');
+    setLoading(false);
+    isSubmittingRef.current = false;
   };
 
   return (
@@ -206,23 +254,44 @@ export const RsvpForm: React.FC = () => {
                     className="space-y-2 pt-1"
                   >
                     <label className="block text-xs font-sans uppercase tracking-[0.2em] text-[#2A221E] font-medium">
-                      Cantidad de personas
+                      ¿Cuántas personas asistirán?
                     </label>
                     <select
                       value={peopleCount}
                       onChange={(e) => setPeopleCount(Number(e.target.value))}
-                      className="w-full px-4 py-3.5 bg-[#FAF7F2] border border-[#E8E2D8] rounded-xl text-sm text-[#2A221E] focus:outline-none focus:border-[#656D4A] transition-colors"
+                      className="w-full px-4 py-3.5 bg-[#FAF7F2] border border-[#E8E2D8] rounded-xl text-sm text-[#2A221E] focus:outline-none focus:border-[#656D4A] transition-colors cursor-pointer"
                     >
-                      {[1, 2, 3, 4, 5, 6, 7, 8].map((num) => (
-                        <option key={num} value={num}>
-                          {num} {num === 1 ? 'persona' : 'personas'}
-                        </option>
-                      ))}
+                      <option value={1}>1 persona</option>
+                      <option value={2}>2 personas</option>
+                      <option value={3}>3 personas</option>
+                      <option value={4}>4 personas</option>
+                      <option value={5}>5 personas</option>
+                      <option value={6}>6 personas</option>
+                      <option value={7}>7 personas</option>
+                      <option value={8}>8 personas</option>
                     </select>
                   </motion.div>
                 )}
 
-                {/* 4. Comentarios (opcional) */}
+                {/* 4. Requerimientos alimentarios */}
+                <div className="space-y-2">
+                  <label className="block text-xs font-sans uppercase tracking-[0.2em] text-[#2A221E] font-medium">
+                    Requerimientos alimentarios
+                  </label>
+                  <select
+                    value={dietary}
+                    onChange={(e) => setDietary(e.target.value)}
+                    className="w-full px-4 py-3.5 bg-[#FAF7F2] border border-[#E8E2D8] rounded-xl text-sm text-[#2A221E] focus:outline-none focus:border-[#656D4A] transition-colors cursor-pointer"
+                  >
+                    <option value="Ninguno">Ninguno</option>
+                    <option value="Vegano">Vegano</option>
+                    <option value="Vegetariano">Vegetariano</option>
+                    <option value="Celíaco">Celíaco</option>
+                    <option value="Diabético">Diabético</option>
+                  </select>
+                </div>
+
+                {/* 5. Comentarios (opcional) */}
                 <div className="space-y-2">
                   <label className="block text-xs font-sans uppercase tracking-[0.2em] text-[#2A221E] font-medium">
                     Comentarios <span className="text-[#9C9286] font-normal">(opcional)</span>
@@ -231,7 +300,7 @@ export const RsvpForm: React.FC = () => {
                     rows={3}
                     value={comments}
                     onChange={(e) => setComments(e.target.value)}
-                    placeholder="Restricciones alimentarias, mensaje o alguna indicación..."
+                    placeholder="Mensaje o alguna indicación para los novios..."
                     className="w-full px-4 py-3.5 bg-[#FAF7F2] border border-[#E8E2D8] rounded-xl text-sm text-[#2A221E] focus:outline-none focus:border-[#656D4A] transition-colors resize-none placeholder:text-[#9C9286]"
                   />
                 </div>

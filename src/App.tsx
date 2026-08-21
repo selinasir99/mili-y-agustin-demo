@@ -11,6 +11,7 @@ import { Gifts } from './components/Gifts';
 import { Photos } from './components/Photos';
 import { Accommodations } from './components/Accommodations';
 import { AccommodationsPage } from './components/AccommodationsPage';
+import { AdminDashboard } from './components/AdminDashboard';
 import { Memories } from './components/Memories';
 import { RsvpForm } from './components/RsvpForm';
 import { FooterHero } from './components/FooterHero';
@@ -21,7 +22,7 @@ import { audioEngine } from './utils/audio';
 export default function App() {
   const [isOpened, setIsOpened] = useState<boolean>(false);
 
-  const [currentView, setCurrentView] = useState<'main' | 'accommodations'>('main');
+  const [currentView, setCurrentView] = useState<'main' | 'accommodations' | 'admin'>('main');
   const [isPlaying, setIsPlaying] = useState<boolean>(false);
   const [isMuted, setIsMuted] = useState<boolean>(false);
 
@@ -57,7 +58,17 @@ export default function App() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
+  const handleOpenAdmin = () => {
+    setCurrentView('admin');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
   const handleBackToMain = () => {
+    setCurrentView('main');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleBackFromAccommodations = () => {
     setCurrentView('main');
     setTimeout(() => {
       const element = document.getElementById('hospedaje');
@@ -74,11 +85,20 @@ export default function App() {
           <WelcomeScreen
             key="welcome-screen"
             onOpen={handleOpenInvitation}
+            onOpenAdmin={() => {
+              setIsOpened(true);
+              handleOpenAdmin();
+            }}
+          />
+        ) : currentView === 'admin' ? (
+          <AdminDashboard
+            key="admin-dashboard"
+            onBackToMain={handleBackToMain}
           />
         ) : currentView === 'accommodations' ? (
           <AccommodationsPage
             key="accommodations-page"
-            onBack={handleBackToMain}
+            onBack={handleBackFromAccommodations}
           />
         ) : (
           <motion.div
@@ -95,6 +115,7 @@ export default function App() {
               setIsMuted={setIsMuted}
               isPlaying={isPlaying}
               setIsPlaying={setIsPlaying}
+              onOpenAdmin={handleOpenAdmin}
             />
 
             {/* Section 1: Hero */}

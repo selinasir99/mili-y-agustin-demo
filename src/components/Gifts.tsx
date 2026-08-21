@@ -6,7 +6,7 @@ export const Gifts: React.FC = () => {
   const [bankModalOpen, setBankModalOpen] = useState(false);
   const [copiedAlias, setCopiedAlias] = useState(false);
 
-  const alias = 'mili.agus.2026';
+  const alias = 'Mili.Agus.2026';
 
   const copyAlias = () => {
     navigator.clipboard.writeText(alias);

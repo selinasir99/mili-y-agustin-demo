@@ -1,8 +1,9 @@
-import React from 'react';
-import { motion } from 'motion/react';
-import { MapPin } from 'lucide-react';
+import React, { useState } from 'react';
+import { motion, AnimatePresence } from 'motion/react';
+import { MapPin, X, MessageCircle, Bus } from 'lucide-react';
 
 export const Timeline: React.FC = () => {
+  const [transportModalOpen, setTransportModalOpen] = useState(false);
   const mapQuery = 'Iglesia+de+Villa+Nougués+Tucuman';
 
   const ceremonyIcon = (
@@ -177,8 +178,8 @@ export const Timeline: React.FC = () => {
             </div>
           </div>
 
-          {/* Action Button: CÓMO LLEGAR (spanning full width of card content) */}
-          <div className="w-full pt-2 sm:pt-4 max-w-xl">
+          {/* Action Buttons: CÓMO LLEGAR and CONTRATÁ TU TRANSPORTE PRIVADO */}
+          <div className="w-full pt-2 sm:pt-4 max-w-xl space-y-3">
             <a
               href={`https://www.google.com/maps/search/?api=1&query=${mapQuery}`}
               target="_blank"
@@ -189,9 +190,83 @@ export const Timeline: React.FC = () => {
               <MapPin className="w-4 h-4 text-[#656D4A]" />
               <span>CÓMO LLEGAR</span>
             </a>
+
+            <button
+              type="button"
+              onClick={() => setTransportModalOpen(true)}
+              className="w-full inline-flex items-center justify-center gap-2.5 px-8 py-4 sm:py-4.5 rounded-full bg-[#FAF7F2] text-[#2A221E] border border-[#E8E2D8] hover:border-[#656D4A]/50 hover:bg-[#FFFFFF] active:scale-[0.99] transition-all duration-300 text-xs font-sans uppercase tracking-[0.2em] font-medium shadow-sm hover:shadow-md cursor-pointer"
+            >
+              <Bus className="w-4 h-4 text-[#656D4A]" />
+              <span>Contratá tu transporte privado</span>
+            </button>
           </div>
         </motion.div>
       </div>
+
+      {/* Modal: Transporte para llegar a Villa Nougués */}
+      <AnimatePresence>
+        {transportModalOpen && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center px-4 bg-[#2A221E]/40 backdrop-blur-sm">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 15 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 15 }}
+              transition={{ duration: 0.3 }}
+              className="relative w-full max-w-md bg-[#FFFFFF] rounded-2xl p-8 sm:p-10 border border-[#E8E2D8] shadow-2xl text-center"
+            >
+              {/* Close Button */}
+              <button
+                onClick={() => setTransportModalOpen(false)}
+                className="absolute top-5 right-5 p-2 rounded-full text-[#9C9286] hover:text-[#2A221E] hover:bg-[#FAF7F2] transition-colors cursor-pointer"
+                aria-label="Cerrar"
+              >
+                <X className="w-5 h-5" />
+              </button>
+
+              <div className="space-y-6 text-center">
+                {/* Header */}
+                <div className="flex flex-col items-center justify-center gap-3 border-b border-[#E8E2D8] pb-4">
+                  <div className="w-10 h-10 rounded-full bg-[#FAF7F2] border border-[#E8E2D8] flex items-center justify-center">
+                    <Bus className="w-4 h-4 text-[#2A221E] stroke-[1.5]" />
+                  </div>
+                  <h3 className="font-serif text-2xl sm:text-3xl font-light text-[#2A221E] text-center leading-tight">
+                    Transporte para llegar<br />a Villa Nougués
+                  </h3>
+                </div>
+
+                {/* Message Body */}
+                <div className="space-y-3 font-sans text-[#6E645A] leading-relaxed text-center">
+                  <p className="font-medium text-[#2A221E] text-base sm:text-lg text-center leading-snug">
+                    ¿Necesitás transporte para llegar<br />a Villa Nougués?
+                  </p>
+                  <p className="text-sm text-[#6E645A] max-w-sm mx-auto text-center">
+                    Te dejamos este contacto de transporte privado para que puedas consultar y coordinar tu traslado.
+                  </p>
+                </div>
+
+                {/* Contact Card & WhatsApp Action */}
+                <div className="pt-2 space-y-4 text-center">
+                  <div className="p-4 rounded-xl bg-[#FAF7F2] border border-[#E8E2D8] space-y-1 text-center">
+                    <p className="text-xs uppercase tracking-wider text-[#9C9286] font-medium text-center">CONTACTO DIRECTO</p>
+                    <p className="font-mono text-base font-semibold text-[#2A221E] tracking-wider text-center">+54 9 381 554-0950</p>
+                  </div>
+
+                  <a
+                    href="https://wa.me/5493815540950?text=Hola!%20Quería%20consultar%20por%20el%20transporte%20para%20el%20casamiento%20de%20Mili%20y%20Agus"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    referrerPolicy="no-referrer"
+                    className="w-full inline-flex items-center justify-center gap-2.5 px-8 py-4 rounded-full bg-[#2A221E] text-[#FAF7F2] border border-[#2A221E] hover:border-[#656D4A]/50 hover:bg-[#3D322C] active:scale-[0.99] transition-all duration-300 text-xs font-sans uppercase tracking-[0.2em] font-medium shadow-[0_8px_20px_rgba(42,34,30,0.08)] hover:shadow-[0_12px_28px_rgba(42,34,30,0.14)] cursor-pointer text-center"
+                  >
+                    <MessageCircle className="w-4 h-4 text-[#656D4A]" />
+                    <span>Contactar por WhatsApp</span>
+                  </a>
+                </div>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </section>
   );
 };
