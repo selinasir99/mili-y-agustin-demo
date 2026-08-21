@@ -16,6 +16,7 @@ import {
   Calendar
 } from 'lucide-react';
 import { RsvpSubmission } from '../types';
+import { getAllRsvps, subscribeToRsvps } from '../lib/rsvpService';
 
 interface AdminDashboardProps {
   onBackToMain: () => void;
@@ -36,53 +37,39 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onBackToMain }) 
   const [filterAttendance, setFilterAttendance] = useState<'all' | 'yes' | 'no'>('all');
   const [isRefreshing, setIsRefreshing] = useState(false);
 
-  // Fetch records from server API and synchronize with localStorage
+  // Fetch records from Firestore persistent database
   const fetchRecords = async () => {
     setIsRefreshing(true);
-    let serverData: RsvpSubmission[] | null = null;
-
-    // 1. Fetch from server API (authoritative source)
     try {
-      const res = await fetch('/api/rsvps');
-      if (res.ok) {
-        const json = await res.json();
-        if (json.success && Array.isArray(json.data)) {
-          serverData = json.data;
-          // Synchronize local storage with current database state
-          localStorage.setItem('wedding_rsvps_records', JSON.stringify(serverData));
-        }
-      }
+      const data = await getAllRsvps();
+      setRecords(data);
     } catch (e) {
-      console.warn('Error fetching from server API, falling back to local storage', e);
+      console.warn('Error fetching Firestore RSVPs:', e);
+    } finally {
+      setIsRefreshing(false);
     }
-
-    let recordsToUse: RsvpSubmission[] = [];
-
-    if (serverData !== null) {
-      recordsToUse = serverData;
-    } else {
-      // Offline fallback: Read from localStorage only if server is unreachable
-      try {
-        const stored = localStorage.getItem('wedding_rsvps_records');
-        if (stored) {
-          recordsToUse = JSON.parse(stored);
-        }
-      } catch (e) {
-        console.warn('Error reading localStorage backup', e);
-      }
-    }
-
-    // Sort descending by date
-    recordsToUse.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-
-    setRecords(recordsToUse);
-    setIsRefreshing(false);
   };
 
+  // Subscribe to real-time changes in Firestore when authenticated
   useEffect(() => {
-    if (isAuthenticated) {
-      fetchRecords();
-    }
+    if (!isAuthenticated) return;
+
+    // 1. Initial fetch
+    fetchRecords();
+
+    // 2. Real-time persistent listener
+    const unsubscribe = subscribeToRsvps(
+      (liveData) => {
+        setRecords(liveData);
+      },
+      (err) => {
+        console.warn('Realtime subscription notice:', err);
+      }
+    );
+
+    return () => {
+      unsubscribe();
+    };
   }, [isAuthenticated]);
 
   const handleLogin = async (e: React.FormEvent) => {

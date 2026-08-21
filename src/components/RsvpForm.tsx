@@ -1,6 +1,7 @@
 import React, { useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Check, Loader2 } from 'lucide-react';
+import { saveRsvpSubmission } from '../lib/rsvpService';
 
 export const RsvpForm: React.FC = () => {
   const [fullName, setFullName] = useState('');
@@ -47,45 +48,21 @@ export const RsvpForm: React.FC = () => {
     const uniqueId = Date.now().toString() + '-' + Math.random().toString(36).substring(2, 9);
     const count = attending === 'yes' ? Number(peopleCount || 1) : 0;
 
-    const newRecord = {
-      id: uniqueId,
-      fullName: fullName.trim(),
-      attending: (attending === 'yes' ? 'yes' : 'no') as 'yes' | 'no',
-      peopleCount: count,
-      dietary: dietary,
-      comments: comments.trim() || 'Sin comentarios',
-      createdAt: new Date().toISOString(),
-    };
-
-    // 1. Save to LocalStorage as immediate client backup
+    // 1. Save to Persistent Firestore Database (with anti-duplicate protection)
     try {
-      const stored = localStorage.getItem('wedding_rsvps_records');
-      const list = stored ? JSON.parse(stored) : [];
-      list.unshift(newRecord);
-      localStorage.setItem('wedding_rsvps_records', JSON.stringify(list));
-    } catch (e) {
-      console.warn('LocalStorage backup error', e);
-    }
-
-    // 2. Save single record to Server Database via /api/rsvps
-    try {
-      await fetch('/api/rsvps', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          id: uniqueId,
-          fullName: fullName.trim(),
-          attending: attending,
-          peopleCount: count,
-          dietary: dietary,
-          comments: comments.trim(),
-        }),
+      await saveRsvpSubmission({
+        id: uniqueId,
+        fullName: fullName.trim(),
+        attending: attending,
+        peopleCount: count,
+        dietary: dietary,
+        comments: comments.trim() || 'Sin comentarios',
       });
     } catch (err) {
-      console.warn('Server API save note:', err);
+      console.warn('Persistent database save notice:', err);
     }
 
-    // 3. Send email notification copy (best-effort, non-blocking)
+    // 2. Send email notification copy (best-effort, non-blocking)
     const payload = {
       _subject: `Confirmación de Boda: ${fullName.trim()}`,
       _template: 'table',

@@ -1,0 +1,27 @@
+{
+  "entities": {
+    "RsvpSubmission": {
+      "title": "RsvpSubmission",
+      "description": "Guest RSVP submission for wedding",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "fullName": { "type": "string" },
+        "attending": { "type": "boolean" },
+        "guestCount": { "type": "number" },
+        "companionNames": { "type": "string" },
+        "dietaryNotes": { "type": "string" },
+        "musicSuggestion": { "type": "string" },
+        "message": { "type": "string" },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["fullName", "attending", "createdAt"]
+    }
+  },
+  "firestore": {
+    "/rsvps/{rsvpId}": {
+      "entity": "RsvpSubmission",
+      "description": "Wedding guest RSVP records"
+    }
+  }
+}
