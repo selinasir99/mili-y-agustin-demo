@@ -165,9 +165,6 @@ export const RsvpForm: React.FC = () => {
           <h2 className="font-serif text-3xl sm:text-5xl font-light text-[#2A221E] tracking-tight">
             Confirmación de asistencia
           </h2>
-          <p className="font-sans text-sm sm:text-base text-[#6E645A] font-light leading-relaxed max-w-lg mx-auto">
-            Nos ayudaría muchísimo que confirmes tu asistencia antes del 1° de agosto.
-          </p>
         </motion.div>
 
         {/* Form Container Card */}
